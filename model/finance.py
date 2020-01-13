@@ -28,10 +28,17 @@ class Invest:
         return [dt.date.today() - app[2] for app in self.__applications]
 
     @property
-    def value(self):
+        def value(self):
         td = dt.date.today()
-        return sum(app[0] * app[1] * ((1 + self.__inc) ** ((td - app[2]).days / 365) - 1) for app in self.__applications)
+        s = 0
+        for app in self.__applications:
+            s += app[0] * app[1] * ((1 + self.__inc) ** ((td - app[2]).days / 365) - 1)
+        return s
 
+    @property
+    def income(self):
+        return self.__inc
+    
     def aplicar(self, value, amount=1, date=dt.date.today()):
         self.__applications.append((amount, value, date))
 
@@ -47,13 +54,41 @@ class RF(Invest):
             return 0.175
         else:
             return 0.15
-    
-    def __init__(self, income, tax=0, fee=0, income_period='year'):
-        super().__init__(income, tax, fee, income_period)
 
+    def __init__(self, income, income_period='year'):
+        super().__init__(income, income_period)
+    
+    @property
+    def tax(self):
+        return [self.imp(app[2].days) for app in self.applications]
 
 
 class RV(Invest):
-    def __init__(self):
-        pass
-# TODO: Formular classe de renda variável
+    def __init__(self, code, price):
+        super().__init__(0)
+        self.__code = code
+        self.__price = price
+
+    @property
+    def code(self):
+        return self.__code
+
+    @property
+    def price(self):
+        return self.__price
+
+    @price.setter
+    def price(self, p):  # TODO: Implementar importação automática do valor da ação
+        self.__price = p
+    
+    @property
+    def amount(self):
+        return sum(app[0] for app in self.applications)
+
+    @property
+    def value(self):
+        return self.price * self.amount
+
+    @property
+    def income(self):
+        return self.value / self.value_inv - 1
