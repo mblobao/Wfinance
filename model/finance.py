@@ -1,8 +1,5 @@
-# 
-from datetime import date, time, datetime, timedelta
+#
 import datetime as dt
-import matplotlib.pyplot as plt
-from numpy import pv, pmt, fv, nper, rate
 
 
 class Invest:
@@ -18,20 +15,24 @@ class Invest:
             self.__inc = income
         elif income_period == 'month':
             self.__inc = (1 + income) ** 12 - 1
-        
+
+    @property
+    def applications(self):
+        return self.__applications
+
     @property
     def value_inv(self):
-        return sum(app[0] * app[1] for app in self.__applications)
+        return sum(app[0] * app[1] for app in self.applications)
 
     @property
     def tempo(self):
-        return [dt.date.today() - app[2] for app in self.__applications]
+        return [dt.date.today() - app[2] for app in self.applications]
 
     @property
-        def value(self):
+    def value(self):
         td = dt.date.today()
         s = 0
-        for app in self.__applications:
+        for app in self.applications:
             s += app[0] * app[1] * ((1 + self.__inc) ** ((td - app[2]).days / 365) - 1)
         return s
 
@@ -39,8 +40,8 @@ class Invest:
     def income(self):
         return self.__inc
     
-    def aplicar(self, value, amount=1, date=dt.date.today()):
-        self.__applications.append((amount, value, date))
+    def apply(self, value, amount=1, date=dt.date.today()):
+        self.applications.append((amount, value, date))
 
 
 class RF(Invest):
@@ -56,7 +57,7 @@ class RF(Invest):
             return 0.15
 
     def __init__(self, income, income_period='year'):
-        super().__init__(income, income_period)
+        super().__init__(income, income_period=income_period)
     
     @property
     def tax(self):
@@ -68,6 +69,7 @@ class RV(Invest):
         super().__init__(0)
         self.__code = code
         self.__price = price
+        self.__earnings = 0
 
     @property
     def code(self):
@@ -92,3 +94,13 @@ class RV(Invest):
     @property
     def income(self):
         return self.value / self.value_inv - 1
+
+    @property
+    def earnings(self):
+        return self.__earnings
+
+    def set_earnings(self, value, add=True):
+        if add:
+            self.__earnings += value
+        else:
+            self.__earnings = value
